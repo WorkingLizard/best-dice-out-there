@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawaii Alpha Dice</title>
+    <style>
+        :root {
+            --dice-white: #ffffff;
+            --dice-border: #5d5d81; 
+            --btn-blue: #e1f7ff;
+            --btn-border: #89b1ff;
+            --dice-size: 110px;
+            --letter-color: #ff85a1; /* Cute pink for the letters */
+        }
+
+        body {
+            background-image: url('background.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            overflow: hidden;
+        }
+
+        .scene { width: var(--dice-size); height: var(--dice-size); perspective: 1000px; margin-bottom: 80px; }
+        .cube {
+            width: 100%; height: 100%; position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.4s cubic-bezier(0.15, 0.9, 0.4, 1);
+            transform: rotateX(-20deg) rotateY(20deg);
+        }
+
+        .face {
+            position: absolute; width: var(--dice-size); height: var(--dice-size);
+            background: var(--dice-white);
+            border: 5px solid var(--dice-border);
+            border-radius: 22px;
+            display: grid;
+            grid-template-areas: "a . b" "c d e" "f . g";
+            padding: 12px; box-sizing: border-box;
+            box-shadow: inset -4px -4px 0px rgba(0,0,0,0.05);
+        }
+
+        /* Styling for the Letter Side */
+        #letter-side {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: var(--letter-color);
+            font-weight: 900;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .pip { width: 18px; height: 18px; background-color: var(--dice-border); border-radius: 50%; align-self: center; justify-self: center; }
+
+        .f1 { transform: rotateY(0deg) translateZ(55px); } /* This is the Letter Side */
+        .f2 { transform: rotateY(180deg) translateZ(55px); grid-template-areas: "a . ." ". . ." ". . g"; }
+        .f3 { transform: rotateY(90deg) translateZ(55px);  grid-template-areas: "a . ." ". d ." ". . g"; }
+        .f4 { transform: rotateY(-90deg) translateZ(55px); grid-template-areas: "a . b" ". . ." "f . g"; }
+        .f5 { transform: rotateX(90deg) translateZ(55px);  grid-template-areas: "a . b" ". d ." "f . g"; }
+        .f6 { transform: rotateX(-90deg) translateZ(55px); grid-template-areas: "a . b" "c . e" "f . g"; }
+
+        .roll-btn {
+            background-color: var(--btn-blue);
+            border: 5px solid var(--btn-border);
+            border-radius: 100px;
+            padding: 15px 70px;
+            font-size: 38px; color: #7189ff; font-weight: 900;
+            cursor: pointer; box-shadow: 0 8px 0 #8fa1ff; transition: 0.1s;
+        }
+        .roll-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #8fa1ff; }
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="cube" id="dice">
+            <!-- Face 1 now shows a Letter -->
+            <div class="face f1" id="letter-side">A</div>
+            
+            <div class="face f2"><div class="pip" style="grid-area: a"></div><div class="pip" style="grid-area: g"></div></div>
+            <div class="face f3"><div class="pip" style="grid-area: a"></div><div class="pip" style="grid-area: d"></div><div class="pip" style="grid-area: g"></div></div>
+            <div class="face f4"><div class="pip" style="grid-area: a"></div><div class="pip" style="grid-area: b"></div><div class="pip" style="grid-area: f"></div><div class="pip" style="grid-area: g"></div></div>
+            <div class="face f5"><div class="pip" style="grid-area: a"></div><div class="pip" style="grid-area: b"></div><div class="pip" style="grid-area: d"></div><div class="pip" style="grid-area: f"></div><div class="pip" style="grid-area: g"></div></div>
+            <div class="face f6"><div class="pip" style="grid-area: a"></div><div class="pip" style="grid-area: b"></div><div class="pip" style="grid-area: c"></div><div class="pip" style="grid-area: e"></div><div class="pip" style="grid-area: f"></div><div class="pip" style="grid-area: g"></div></div>
+        </div>
+    </div>
+
+    <button class="roll-btn" onclick="rollDice()">ROLL!</button>
+
+    <script>
+        let currentX = -20;
+        let currentY = 20;
+
+        function rollDice() {
+            const dice = document.getElementById('dice');
+            const letterSide = document.getElementById('letter-side');
+            const result = Math.floor(Math.random() * 6) + 1;
+
+            // Randomly pick A, B, or C for the special side
+            const letters = ['A', 'B', 'C'];
+            const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+            
+            // Update the letter BEFORE the dice finishes spinning
+            letterSide.innerText = randomLetter;
+
+            const angles = {
+                1: { x: 0,   y: 0 },
+                2: { x: 0,   y: 180 },
+                3: { x: 0,   y: -90 },
+                4: { x: 0,   y: 90 },
+                5: { x: -90, y: 0 },
+                6: { x: 90,  y: 0 }
+            };
+
+            const target = angles[result];
+            currentX += 720 + target.x;
+            currentY += 720 + target.y;
+
+            dice.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
+        }
+    </script>
+</body>
+</html>
